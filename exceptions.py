@@ -13,3 +13,6 @@ class ResponseDicNotContainHomeworkKeyException(Exception):
 class ResponseKeyHomeworksIsNotListException(Exception):
     pass
 
+
+class NoRequiredKey(Exception):
+    pass
