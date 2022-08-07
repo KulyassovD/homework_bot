@@ -31,6 +31,7 @@ HOMEWORK_STATUSES = {
 
 
 def send_message(bot, message):
+    """Отправка сообщений"""
     try:
         bot.send_message(TELEGRAM_CHAT_ID, message)
         logging.info('Сообщение успешно отправлено')
@@ -39,6 +40,7 @@ def send_message(bot, message):
 
 
 def get_api_answer(current_timestamp):
+    """Запрос к API"""
     timestamp = current_timestamp or int(time.time())
     params = {'from_date': timestamp}
     try:
@@ -51,6 +53,7 @@ def get_api_answer(current_timestamp):
 
 
 def check_response(response):
+    """Проверка и первая фильтрация"""
     try:
         homework_statuses = response.get('homeworks')
         return homework_statuses
@@ -59,6 +62,7 @@ def check_response(response):
 
 
 def parse_status(homework):
+    """Получение статуса"""
     try:
         homework_name = homework[0]['homework_name']
     except Exception as error:
@@ -66,11 +70,12 @@ def parse_status(homework):
     try:
         verdict = HOMEWORK_STATUSES[homework[0]['status']]
     except Exception as error:
-        logging.error(f'отсутсвует нужный ключ-статус {error}')
+        logging.error(f'отсутсвует нужный вердикт {error}')
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
 
 def check_tokens():
+    """Проверка токенов"""
     logging.info('Запущена функция "check_tokens"')
     tokens = ("PRACTICUM_TOKEN", "TELEGRAM_TOKEN", "TELEGRAM_CHAT_ID")
 
@@ -93,16 +98,12 @@ def main():
             response = get_api_answer(current_timestamp)
             homework = check_response(response)
             message = parse_status(homework)
-            cash = message
-            if cash != message:
-                send_message(bot, message)
-            time.sleep(RETRY_TIME)
+            send_message(bot, message)
+            time.sleep(10)
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
             send_message(bot, message)
             time.sleep(RETRY_TIME)
-        else:
-            pass
 
 
 if __name__ == '__main__':
