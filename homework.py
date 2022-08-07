@@ -45,7 +45,7 @@ def get_api_answer(current_timestamp):
     params = {'from_date': timestamp}
     response = requests.get(ENDPOINT, headers=HEADERS, params=params)
     if response.status_code != HTTPStatus.OK:
-        logging.error(f'Ошибка при запросе к основному API: {error}')
+        logging.error('Ошибка при запросе к основному API')
         raise exceptions.APIError
     else:
         return response.json()
