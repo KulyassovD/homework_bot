@@ -1,0 +1,3 @@
+class InaccessibilityAPIError(Exception):
+    pass
+
