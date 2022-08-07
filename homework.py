@@ -43,22 +43,27 @@ def get_api_answer(current_timestamp):
     """Запрос к API."""
     timestamp = current_timestamp or int(time.time())
     params = {'from_date': timestamp}
-    try:
-        response = requests.get(ENDPOINT, headers=HEADERS, params=params)
-        if response.status_code != HTTPStatus.OK:
-            raise exceptions.InaccessibilityAPIError
-        return response.json()
-    except Exception as error:
+    response = requests.get(ENDPOINT, headers=HEADERS, params=params)
+    if response.status_code != HTTPStatus.OK:
         logging.error(f'Ошибка при запросе к основному API: {error}')
+        raise exceptions.APIError
+    else:
+        return response.json()
 
 
 def check_response(response):
-    """Проверка и первая фильтрация."""
-    try:
-        homework_statuses = response.get('homeworks')
-        return homework_statuses
-    except Exception as error:
-        logging.error(f'отсутствие ожидаемых ключей в ответе API {error}')
+    if len(response) == 0:
+        logging.error('Ответ от API содержит пустой словарь')
+        raise exceptions.ResponseDicIsEmptyException
+    if response['homeworks'] is False:
+        logging.error('Словарь в ответе от API не содержит ключ `homeworks`')
+        raise exceptions.ResponseDicNotContainHomeworkKeyException
+    if not isinstance(response['homeworks'], list):
+        logging.error('Под ключом `homeworks` ДР приходят не в виде списка')
+        raise exceptions.ResponseKeyHomeworksIsNotListException
+    if len(response['homeworks']) == 0:
+        return 0
+    return response['homeworks']
 
 
 def parse_status(homework):
