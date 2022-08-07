@@ -12,3 +12,4 @@ class ResponseDicNotContainHomeworkKeyException(Exception):
 
 class ResponseKeyHomeworksIsNotListException(Exception):
     pass
+

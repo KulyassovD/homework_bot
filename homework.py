@@ -52,6 +52,7 @@ def get_api_answer(current_timestamp):
 
 
 def check_response(response):
+    """Проверка полученного ответа от API."""
     if len(response) == 0:
         logging.error('Ответ от API содержит пустой словарь')
         raise exceptions.ResponseDicIsEmptyException
