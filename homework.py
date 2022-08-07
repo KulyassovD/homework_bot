@@ -105,7 +105,7 @@ def main():
             homework = check_response(response)
             message = parse_status(homework)
             send_message(bot, message)
-            time.sleep(10)
+            time.sleep(RETRY_TIME)
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
             send_message(bot, message)
