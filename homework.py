@@ -52,7 +52,7 @@ def get_api_answer(current_timestamp):
 
 
 def check_response(response):
-    """Проверка полученного ответа ответа от API."""
+    """Проверка полученного ответа от API."""
     if len(response) == 0:
         logging.error('Ответ от API содержит пустой словарь')
         raise exceptions.ResponseDicIsEmptyException
@@ -64,19 +64,13 @@ def check_response(response):
         raise exceptions.ResponseKeyHomeworksIsNotListException
     if len(response['homeworks']) == 0:
         return 0
-    return response['homeworks'][0]
+    return response['homeworks']
 
 
 def parse_status(homework):
     """Получение статуса."""
-    try:
-        homework_name = homework['homework_name']
-    except Exception as error:
-        logging.error(f'отсутсвует нужный ключ {error}')
-    try:
-        verdict = HOMEWORK_STATUSES[homework['status']]
-    except Exception as error:
-        logging.error(f'отсутсвует нужный вердикт {error}')
+    homework_name = homework['homework_name']
+    verdict = HOMEWORK_STATUSES[homework['status']]
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
 
@@ -102,7 +96,7 @@ def main():
     while True:
         try:
             response = get_api_answer(current_timestamp)
-            homework = check_response(response)
+            homework = check_response(response)[0]
             message = parse_status(homework)
             send_message(bot, message)
             time.sleep(RETRY_TIME)
