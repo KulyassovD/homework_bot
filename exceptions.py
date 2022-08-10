@@ -20,7 +20,3 @@ class NoRequiredKey(Exception):
 
 class MessageSendingError(Exception):
     pass
-
-
-class ConversionError(Exception):
-    pass

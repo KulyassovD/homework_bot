@@ -1,11 +1,17 @@
 import logging
 import os
 import time
-from logging.handlers import RotatingFileHandler
 from http import HTTPStatus
+from logging.handlers import RotatingFileHandler
+
 import requests
 import telegram
 from dotenv import load_dotenv
+
+try:
+    from simplejson.errors import JSONDecodeError
+except ImportError:
+    from json.decoder import JSONDecodeError
 
 import exceptions
 
@@ -39,29 +45,31 @@ HOMEWORK_STATUSES = {
 
 def send_message(bot, message):
     """Отправка сообщений."""
+    logger.info('Запущена функция send_message"')
     try:
         bot.send_message(TELEGRAM_CHAT_ID, message)
         logger.info('Сообщение успешно отправлено')
-    except Exception as error:
+    except telegram.TelegramError as error:
         logger.error(f'Не удалось отправить сообщение {error}')
-        raise exceptions.MessageSendingError
+        raise telegram.TelegramError
 
 
 def get_api_answer(current_timestamp):
     """Запрос к API."""
+    logger.info('Запущена функция "get_api_answer"')
     timestamp = current_timestamp or int(time.time())
     params = {'from_date': timestamp}
     try:
         response = requests.get(ENDPOINT, headers=HEADERS, params=params)
         if response.status_code != HTTPStatus.OK:
-            logging.error('Ошибка при запросе к основному API')
+            logger.error('Ошибка при запросе к основному API')
             raise exceptions.APIError
         else:
             try:
                 return response.json()
-            except Exception:
-                logging.error('Не удалось преобразовать из JSON в dict')
-                raise requests.ConversionError
+            except JSONDecodeError:
+                logger.error('Не удалось преобразовать из JSON в dict')
+                raise JSONDecodeError
 
     except requests.exceptions.Timeout:
         logger.error('Время ожидания превышено')
@@ -82,24 +90,26 @@ def get_api_answer(current_timestamp):
 
 def check_response(response):
     """Проверка полученного ответа от API."""
-    if len(response) == 0:
-        logger.error('Ответ от API содержит пустой словарь')
-        raise exceptions.ResponseDicIsEmptyException
-    if not isinstance(response['homeworks'], list):
-        logger.error('Под ключом `homeworks` ДР приходят не в виде списка')
-        raise exceptions.ResponseKeyHomeworksIsNotListException
-    if len(response['homeworks']) == 0:
-        return 0
-    try:
-        response['homeworks']
-    except KeyError:
-        logger.error('Словарь в ответе от API не содержит ключ `homeworks`')
-        raise KeyError
-    return response['homeworks']
+    logger.info('Запущена функция "check_response"')
+    if not isinstance(response, dict):
+        logger.error('Тип данных не dict')
+        raise TypeError('Тип данных не dict')
+    if 'homeworks' not in response:
+        logger.error('Отсутствие ожидаемых ключей в ответе API')
+        raise KeyError('Отсутствие ожидаемых ключей в ответе API')
+    if not isinstance(response['homeworks'], list): 
+        logger.error('Под ключом `homeworks` ДР приходят не в виде списка') 
+        raise TypeError('Тип данных dict')
+    homeworks = response['homeworks']
+    if len('homeworks') == 0:
+        logger.error('Список проверяемых работ пуст!')
+        raise IndexError('Список проверяемых работ пуст!')
+    return homeworks
 
 
 def parse_status(homework):
     """Получение статуса."""
+    logger.info('Запущена функция "parse_status"')
     try:
         homework_name = homework['homework_name']
         homework_status = homework['status']
@@ -131,13 +141,13 @@ def main():
     """Основная логика работы бота."""
     check_tokens()
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
-    current_timestamp = int(time.time() - 2629743)
+    current_timestamp = int(time.time())
 
     while True:
         try:
             response = get_api_answer(current_timestamp)
-            homework = check_response(response)
-            message = parse_status(homework[0])
+            homework = check_response(response)[0]
+            message = parse_status(homework)
             send_message(bot, message)
             time.sleep(RETRY_TIME)
         except Exception as error:
