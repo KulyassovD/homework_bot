@@ -16,3 +16,11 @@ class ResponseKeyHomeworksIsNotListException(Exception):
 
 class NoRequiredKey(Exception):
     pass
+
+
+class MessageSendingError(Exception):
+    pass
+
+
+class ConversionError(Exception):
+    pass
