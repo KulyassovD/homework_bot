@@ -97,8 +97,8 @@ def check_response(response):
     if 'homeworks' not in response:
         logger.error('Отсутствие ожидаемых ключей в ответе API')
         raise KeyError('Отсутствие ожидаемых ключей в ответе API')
-    if not isinstance(response['homeworks'], list): 
-        logger.error('Под ключом `homeworks` ДР приходят не в виде списка') 
+    if not isinstance(response['homeworks'], list):
+        logger.error('Под ключом `homeworks` ДР приходят не в виде списка')
         raise TypeError('Тип данных dict')
     homeworks = response['homeworks']
     if len('homeworks') == 0:
@@ -146,9 +146,9 @@ def main():
     while True:
         try:
             response = get_api_answer(current_timestamp)
-            homework = check_response(response)[0]
-            message = parse_status(homework)
-            send_message(bot, message)
+            homework = check_response(response)[0] #Не пойму как устранить эту проблему. Но нужно ли?
+            message = parse_status(homework) #У меня прописано исключение IndexError. Тестировал.
+            send_message(bot, message) #Отправлял пустой список и он не рушил программу, а вызывал исключение.
             time.sleep(RETRY_TIME)
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
