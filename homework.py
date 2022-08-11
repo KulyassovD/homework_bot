@@ -146,9 +146,13 @@ def main():
     while True:
         try:
             response = get_api_answer(current_timestamp)
-            homework = check_response(response)[0] #Не пойму как устранить эту проблему. Но нужно ли?
-            message = parse_status(homework) #У меня прописано исключение IndexError. Тестировал.
-            send_message(bot, message) #Отправлял пустой список и он не рушил программу, а вызывал исключение.
+            homework = check_response(response)[0]
+            """Не пойму как устранить эту проблему. Но нужно ли?
+            У меня прописано исключение IndexError. Тестировал.
+            Отправлял пустой список и он не рушил программу,
+            а вызывал исключение."""
+            message = parse_status(homework)
+            send_message(bot, message)
             time.sleep(RETRY_TIME)
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
