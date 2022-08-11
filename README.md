@@ -1,2 +1,4 @@
-# homework_bot
-python telegram bot
+Разверните в репозитории виртуальное окружение: py -m venv venv
+Активируйте виртуальное окружение.
+В виртуальном окружении установите зависимости: pip install -r requirements.txt
+Запустите программу: python homework.py
